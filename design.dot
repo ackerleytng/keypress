@@ -1,0 +1,23 @@
+digraph g {
+    protected_application [label="Protected\nApplication"]
+    keycentre [label="KeyCentre"]
+    keycloak [label="Keycloak"]
+    kong [label="Kong",shape=rectangle]
+    client [label="Client"]
+
+    client -> kong [label="API Key"]
+    kong -> kong [label="Exchange API Key\nfor long-lived access token"]
+    kong -> protected_application [label="Long-lived\naccess token",weight=10]
+
+    kong -> keycentre [label="Regular\naccess token",weight=5]
+    keycentre -> keycloak [label="Regular\naccess token"]
+    keycloak -> keycentre [label="Long-lived\naccess token"]
+
+    keycentre -> kong [label="Register\nLong-lived\naccess token"]
+
+    {
+        rank=same
+        keycloak
+        kong
+    }
+}
