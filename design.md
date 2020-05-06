@@ -9,30 +9,30 @@ This application has 2 components
 
 ## Service that manages API key
 
-+ Users must log in to KeyCentre as they would with any other SSO-protected site
-  + KeyCentre is an OAuth client on its own
-+ KeyCentre will register itself as a valid redirect-uri of all the
++ Users must log in to Keypress as they would with any other SSO-protected site
+  + Keypress is an OAuth client on its own
++ Keypress will register itself as a valid redirect-uri of all the
   applications it is managing API keys of
 
 ### Getting a long-lived access token
 
-+ KeyCentre will redirect the user to authenticate with Keycloak, using the regular authorization code flow
-+ The browser will return an authorization code, Kong will swap that for the access token and pass the access token to KeyCentre
-+ KeyCentre will exchange the access token for a long-lived access token through loorent's Keycloak plugin
-+ KeyCentre will then issue a randomly generated API key, and set the access token at the kong plugin
++ Keypress will redirect the user to authenticate with Keycloak, using the regular authorization code flow
++ The browser will return an authorization code, Kong will swap that for the access token and pass the access token to Keypress
++ Keypress will exchange the access token for a long-lived access token through loorent's Keycloak plugin
++ Keypress will then issue a randomly generated API key, and set the access token at the kong plugin
 
 > Need to check if kong-oidc will handle exchanging of authorization codes of
->   clients other than the main client, which is KeyCentre. If we're already
->   logged in to KeyCentre, will kong-oidc still swap the authorization code on
->   KeyCentre's behalf?
+>   clients other than the main client, which is Keypress. If we're already
+>   logged in to Keypress, will kong-oidc still swap the authorization code on
+>   Keypress's behalf?
 
 ### Listing access tokens
 
-+ KeyCentre should be able to list access tokens, grouped by application that it is protecting
++ Keypress should be able to list access tokens, grouped by application that it is protecting
 
 ### Revoking access tokens
 
-+ KeyCentre will call the revoke access token endpoint of the Kong plugin, and remove the API key from its own database
++ Keypress will call the revoke access token endpoint of the Kong plugin, and remove the API key from its own database
 
 ## Kong plugin
 
