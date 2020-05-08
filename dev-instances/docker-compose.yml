@@ -1,0 +1,82 @@
+version: "3.7"
+
+services:
+  caddy:
+    image: caddy:alpine
+    volumes:
+      - ./compose/caddy/Caddyfile:/tmp/Caddyfile:ro
+    ports:
+      - 80:80
+      - 443:443
+    entrypoint: caddy run --environ --adapter caddyfile --config /tmp/Caddyfile
+    networks:
+      default:
+        aliases:
+          - caddy.localhost
+          - keycloak.localhost
+          - foo.localhost
+          - bar.localhost
+
+  keycloak:
+    image: jboss/keycloak:9.0.3
+    depends_on:
+      - caddy
+    volumes:
+      - ./compose/keycloak/setup.sh:/setup.sh:ro
+      - ./compose/keycloak/start.sh:/start.sh:ro
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: keycloak-postgres
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_SCHEMA: public
+      DB_PASSWORD: password
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: password
+      PROXY_ADDRESS_FORWARDING: "true"
+      KEYCLOAK_HOME: /opt/jboss/keycloak
+    entrypoint: /start.sh
+
+  keycloak-postgres:
+    image: postgres:12
+    volumes:
+      - keycloak-postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+
+  foo:
+    image: containous/whoami
+    depends_on:
+      - foo-gatekeeper
+
+  foo-gatekeeper:
+    image: alpine:3.8
+    volumes:
+      - ./compose/gatekeeper/:/gatekeeper/:ro
+      - ./compose/gatekeeper/foo-config.yml:/tmp/config.yml:ro
+    entrypoint: /gatekeeper/start.sh read write
+    depends_on:
+      - keycloak
+    environment:
+      CLIENT_NAME: foo
+
+  bar:
+    image: containous/whoami
+    depends_on:
+      - bar-gatekeeper
+
+  bar-gatekeeper:
+    image: alpine:3.8
+    volumes:
+      - ./compose/gatekeeper/:/gatekeeper/:ro
+      - ./compose/gatekeeper/bar-config.yml:/tmp/config.yml:ro
+    entrypoint: /gatekeeper/start.sh read write
+    depends_on:
+      - keycloak
+    environment:
+      CLIENT_NAME: bar
+
+volumes:
+  keycloak-postgres:

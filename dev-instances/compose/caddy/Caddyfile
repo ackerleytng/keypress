@@ -1,0 +1,23 @@
+keycloak.localhost {
+    reverse_proxy http://keycloak:8080 {
+        header_up X-Forwarded-Proto {http.request.scheme}
+        header_up X-Forwarded-For {http.request.remote.host}
+    }
+    tls internal
+}
+
+foo.localhost {
+    reverse_proxy http://foo-gatekeeper
+    tls internal
+}
+
+bar.localhost {
+    reverse_proxy http://bar-gatekeeper
+    tls internal
+}
+
+caddy.localhost {
+    file_server /root.crt {
+        root /data/caddy/pki/authorities/local/
+    }
+}

@@ -1,0 +1,25 @@
+client-id: bar
+discovery-url: https://keycloak.localhost/auth/realms/applications
+encryption-key: hO5f0LzTcDa1SXu5dbejQiHr2rR6aHW2
+
+scopes:
+  - bar
+
+# Turn on debug
+verbose: true
+
+enable-refresh-tokens: true
+
+listen: :80
+redirection-url: https://bar.localhost
+upstream-url: http://bar:80
+
+enable-default-deny: true
+
+# Use gatekeeper like kong, which handles all authentication
+# Only whitelist /, everything else requires authentication
+resources:
+- uri: /
+  methods:
+  - GET
+  white-listed: true
