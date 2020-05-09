@@ -78,5 +78,21 @@ services:
     environment:
       CLIENT_NAME: bar
 
+  keypress:
+    image: containous/whoami
+    depends_on:
+      - keypress-gatekeeper
+
+  keypress-gatekeeper:
+    image: alpine:3.8
+    volumes:
+      - ./compose/gatekeeper/:/gatekeeper/:ro
+      - ./compose/gatekeeper/keypress-config.yml:/tmp/config.yml:ro
+    entrypoint: /gatekeeper/start.sh read write
+    depends_on:
+      - keycloak
+    environment:
+      CLIENT_NAME: keypress
+
 volumes:
   keycloak-postgres:

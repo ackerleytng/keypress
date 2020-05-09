@@ -16,6 +16,11 @@ bar.localhost {
     tls internal
 }
 
+keypress.localhost {
+    reverse_proxy http://keypress-gatekeeper
+    tls internal
+}
+
 caddy.localhost {
     file_server /root.crt {
         root /data/caddy/pki/authorities/local/
