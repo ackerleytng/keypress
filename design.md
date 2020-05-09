@@ -1,8 +1,9 @@
 # Design
 
-This application has 2 components
+This application has 3 components
 
-+ The service that manages the API key and a light frontend
++ The service that manages the API key and a light frontend (keypress)
++ A custom expiration time extension mapper ([exp-mapper](https://github.com/ackerleytng/exp-mapper)).
 + A kong plugin, and a database that is part of kong
 
 ![design.svg](./design.svg)
@@ -11,20 +12,42 @@ This application has 2 components
 
 + Users must log in to Keypress as they would with any other SSO-protected site
   + Keypress is an OAuth client on its own
-+ Keypress will register itself as a valid redirect-uri of all the
-  applications it is managing API keys of
+
+### `exp-mapper` setup
+
+The extension of expiration time is clearly weakening security, and hence we
+need to be very careful with those access tokens with extended validity.
+
+Here are the considerations for the security of the long-lived access tokens.
+
++ The long-lived access tokens are never released to a public client or User Agent
+  + They will only live within Kong (server side), the keypress database and Keycloak
+  + All communications between these three parties are protected by TLS
+
+We also want to reduce the chance that other applications can request an
+extension on validity, and hence we have the following setup.
+
+1. Create a special client scope called `exp-extension`. This client scope will
+   contain the exp-mapper mapper as the only mapper, for easy composition with
+   other client scopes.
+2. Configure `exp-mapper` to only permit keypress as the client. This way, even
+   if other applications request the `exp-extension` scope, the `exp` extension
+   will not be granted. (The original token will be returned for other clients)
+3. Disable "Full Scope Allowed" for your clients.
+4. Configure `exp-extension` as an "Assigned Optional Client Scope" only for
+   the client you want to allow `exp-extension` to be used. We *don't* use
+   "Assigned Default Client Scopes" because we don't want `exp-extension` to be
+   applied by default. (Even if it were applied by default, only keypress would
+   get the extension, since that was configured in the mapper itself)
+5. Configure Token Exchange for your client to permit keypress to exchange
+   tokens. (This allows keypress to exchange *any* token, not just keypress's
+   tokens, for the target client, but I can't seem to make keycloak permit only
+   a certain role guaranteed only to be available in a keypress token.)
 
 ### Getting a long-lived access token
 
-+ Keypress will redirect the user to authenticate with Keycloak, using the regular authorization code flow
-+ The browser will return an authorization code, Kong will swap that for the access token and pass the access token to Keypress
-+ Keypress will exchange the access token for a long-lived access token through loorent's Keycloak plugin
++ Keypress will exchange the its own access token (keypress's token) for an access token with an extended expiration time
 + Keypress will then issue a randomly generated API key, and set the access token at the kong plugin
-
-> Need to check if kong-oidc will handle exchanging of authorization codes of
->   clients other than the main client, which is Keypress. If we're already
->   logged in to Keypress, will kong-oidc still swap the authorization code on
->   Keypress's behalf?
 
 ### Listing access tokens
 
