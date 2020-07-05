@@ -18,7 +18,7 @@ fi
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 
 # Get the token (default: expires in 1 minute)
-token=$($script_dir/get-token.sh)
+token=$("$script_dir/get-token.sh")
 
 # Wait up to 30s until applications realm is created
 for i in $(seq 30); do

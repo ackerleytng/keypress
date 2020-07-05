@@ -18,7 +18,7 @@ services:
           - bar.localhost
 
   keycloak:
-    image: jboss/keycloak:9.0.3
+    image: jboss/keycloak:10.0.2
     depends_on:
       - caddy
     volumes:
@@ -52,7 +52,7 @@ services:
       - foo-gatekeeper
 
   foo-gatekeeper:
-    image: alpine:3.8
+    image: debian:buster-slim
     volumes:
       - ./compose/gatekeeper/:/gatekeeper/:ro
       - ./compose/gatekeeper/foo-config.yml:/tmp/config.yml:ro
@@ -68,7 +68,7 @@ services:
       - bar-gatekeeper
 
   bar-gatekeeper:
-    image: alpine:3.8
+    image: debian:buster-slim
     volumes:
       - ./compose/gatekeeper/:/gatekeeper/:ro
       - ./compose/gatekeeper/bar-config.yml:/tmp/config.yml:ro
@@ -84,7 +84,7 @@ services:
       - keypress-gatekeeper
 
   keypress-gatekeeper:
-    image: alpine:3.8
+    image: debian:buster-slim
     volumes:
       - ./compose/gatekeeper/:/gatekeeper/:ro
       - ./compose/gatekeeper/keypress-config.yml:/tmp/config.yml:ro

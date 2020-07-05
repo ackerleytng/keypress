@@ -4,17 +4,14 @@
 # Pass client roles that you want to add as arguments
 # Example: ./start.sh list detail
 
-NAME=keycloak-gatekeeper
-KEYCLOAK_VERSION=9.0.2
-GOOS=linux
-GOARCH=amd64
+LOUKETO_VERSION=1.0.0
 
-command -v curl || apk add --no-cache ca-certificates curl tar bash
+command -v curl || apt update && apt install curl -y
 command -v jq || curl -o /bin/jq -L https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 && chmod +x /bin/jq
 command -v wait-for-it.sh || curl -o /bin/wait-for-it.sh https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh && chmod +x /bin/wait-for-it.sh
 
 # Setup gatekeeper
-[ -f /opt/keycloak-gatekeeper ] || curl -fsSL "https://downloads.jboss.org/keycloak/$KEYCLOAK_VERSION/gatekeeper/$NAME-$GOOS-$GOARCH.tar.gz" | tar -xz -C /tmp && chmod +x /tmp/$NAME
+[ -f /opt/keycloak-gatekeeper ] || curl -fsSL "https://github.com/louketo/louketo-proxy/releases/download/${LOUKETO_VERSION}/louketo-proxy_${LOUKETO_VERSION}_linux_amd64.tar.gz" | tar -xz --strip-components=1 -C /tmp && chmod +x /tmp/louketo-proxy
 
 curl -sSkL https://caddy.localhost/root.crt -o /usr/local/share/ca-certificates/caddy.crt
 
@@ -31,4 +28,4 @@ wait-for-it.sh -t 60 keycloak:8443
 client_secret=$(/gatekeeper/setup.sh $@)
 
 echo ">>> Using client_secret=|$client_secret|"
-exec /tmp/keycloak-gatekeeper --config /tmp/config.yml --client-secret=$client_secret
+exec /tmp/louketo-proxy --config /tmp/config.yml --client-secret="$client_secret"
